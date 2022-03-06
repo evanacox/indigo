@@ -1,0 +1,3 @@
+[submodule "vendor/freestanding-rt"]
+	path = vendor/freestanding-rt
+	url = https://github.com/evanacox/freestanding-rt/
