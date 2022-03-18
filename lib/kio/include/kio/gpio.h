@@ -16,7 +16,7 @@
 
 namespace kio {
   // See pg. 67 of BCM2711 (5.2)
-  inline constexpr std::uintptr_t gpio_base = /* kio::mmio_base + */ 0x200000;
+  inline constexpr std::uintptr_t gpio_base = kio::mmio_base + 0x200000;
   inline constexpr std::uintptr_t gpio_function_select0 = kio::gpio_base + 0x00;
   inline constexpr std::uintptr_t gpio_function_select1 = kio::gpio_base + 0x04;
   inline constexpr std::uintptr_t gpio_function_select2 = kio::gpio_base + 0x08;

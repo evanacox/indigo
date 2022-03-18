@@ -25,28 +25,19 @@ namespace kio {
 #error "Must define `INDIGO_RPI_3` or `INDIGO_RPI_4`!"
 #endif
 
-  /// Gets the MMIO starting address, can be offset to get a specific MMIO peripheral
-  ///
-  /// \return `kio::mmio_base` as a pointer
-  [[nodiscard]] inline std::byte* mmio_address() {
-    // technically this is not `constexpr` due to standard requiring pointer bit-casts
-    // to not be constant expressions, unfortunate
-    return std::bit_cast<std::byte*>(kio::mmio_base);
-  }
-
   /// Writes to a specific MMIO offset
   ///
-  /// \param offset The offset from `mmio_address()` to write to
+  /// \param address The address to write to
   /// \param data The data to write to the MMIO address
-  inline void mmio_write(std::uintptr_t offset, std::uint32_t data) {
-    *reinterpret_cast<volatile std::uint32_t*>(mmio_address() + offset) = data;
+  inline void mmio_write(std::uintptr_t address, std::uint32_t data) {
+    *std::bit_cast<volatile std::uint32_t*>(address) = data;
   }
 
   /// Reads from a specific MMIO offset
   ///
-  /// \param offset The offset from `mmio_read()` to read from
+  /// \param address The address to read from
   /// \return The data at that MMIO address
-  inline std::uint32_t mmio_read(std::uintptr_t offset) {
-    return *reinterpret_cast<volatile std::uint32_t*>(kio::mmio_address() + offset);
+  inline std::uint32_t mmio_read(std::uintptr_t address) {
+    return *std::bit_cast<volatile std::uint32_t*>(address);
   }
 } // namespace kio
