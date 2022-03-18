@@ -16,17 +16,16 @@ SECTIONS
     .text : { KEEP(*(.text.boot)) *(.text .text.* .gnu.linkonce.t*) }
     .rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) }
     .data : { *(.data .data.* .gnu.linkonce.d*) }
-    . = ALIGN(8); /* 8-byte align BSS so we can zero it with `str` */
+    . = ALIGN(16); /* 8-byte align BSS so we can zero it with `str` */
     .bss (NOLOAD) :
     {
         __bss_start = .;
-        *(.bss .bss.*)
+        *(.bss .bss.* COMMON)
+        . = ALIGN(16);
         __bss_end = .;
-        __bss_size = (__bss_end - __bss_start);
+        __bss_size = (__bss_end - __bss_start) >> 3; /* bss_size is measured in dwords (8-byte chunks) not bytes */
     }
     . = ALIGN(4096);
     _end = .;
-    . = _end + 0x400000; /* 4MB stack */
-    __stack_start = .;
     /DISCARD/ : { *(.comment) *(.gnu*) *(.note*) *(.eh_frame*) }
 }

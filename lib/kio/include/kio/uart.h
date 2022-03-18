@@ -13,7 +13,7 @@
 #include "./mmio.h"
 
 namespace kio {
-  inline constexpr std::uintptr_t aux_base = kio::mmio_base + 0x215000;
+  inline constexpr std::uintptr_t aux_base = /* kio::mmio_base + */ 0x215000;
   inline constexpr std::uintptr_t aux_interrupt_status = kio::aux_base + 0x00;
   inline constexpr std::uintptr_t aux_enables = kio::aux_base + 0x04;
   inline constexpr std::uintptr_t aux_uart_io = kio::aux_base + 0x40;
@@ -24,7 +24,9 @@ namespace kio {
   inline constexpr std::uintptr_t aux_uart_line_status = kio::aux_base + 0x54;
   inline constexpr std::uintptr_t aux_uart_modem_status = kio::aux_base + 0x58;
   inline constexpr std::uintptr_t aux_uart_extra_control = kio::aux_base + 0x58;
-  inline constexpr std::uintptr_t aux_uart_baud_rate = kio::aux_base + 0x68;
+  inline constexpr std::uintptr_t aux_uart_baudrate = kio::aux_base + 0x68;
+  inline constexpr int uart_transmit_pin = 14;
+  inline constexpr int uart_receive_pin = 15;
 
   void uart_init();
 

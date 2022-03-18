@@ -16,7 +16,7 @@
 
 namespace kio {
   // See pg. 67 of BCM2711 (5.2)
-  inline constexpr std::uintptr_t gpio_base = kio::mmio_base + 0x200000;
+  inline constexpr std::uintptr_t gpio_base = /* kio::mmio_base + */ 0x200000;
   inline constexpr std::uintptr_t gpio_function_select0 = kio::gpio_base + 0x00;
   inline constexpr std::uintptr_t gpio_function_select1 = kio::gpio_base + 0x04;
   inline constexpr std::uintptr_t gpio_function_select2 = kio::gpio_base + 0x08;
@@ -35,7 +35,7 @@ namespace kio {
 
   /// Defines the "GPIO Function" of a specific pin. Each pin can be in one of 6 alternate states,
   /// or can be an input/output pin.
-  enum class GPIOFunction {
+  enum class GPIOFunction : std::uint32_t {
     input = 0b000,
     output = 0b001,
     alternate_0 = 0b100,
@@ -58,7 +58,7 @@ namespace kio {
   /// Sets a GPIO pin to its OFF state.
   void gpio_clear(int pin);
 
-  enum class PullState {
+  enum class PullState : std::uint32_t {
     none = 0b00,
 
 #ifdef INDIGO_RPI_4

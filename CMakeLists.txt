@@ -13,10 +13,9 @@ project(indigo LANGUAGES CXX ASM)
 
 include(cmake/Configure.cmake)
 include(cmake/GenerateImage.cmake)
+include(cmake/Deploy.cmake)
 
-option(INDIGO_RPI_4 "Whether or not to build for RPi-4 (builds for RPi-3 otherwise)" ON)
-
-# "freestanding"
+# 'freestanding' implementation, eh?
 set(FRT_HAS_STDLIB ON)
 set(FRT_HAS_COMPARE ON)
 set(FRT_HAS_NEW ON)
@@ -25,6 +24,14 @@ set(FRT_HAS_ASSERT_FAIL ON)
 set(FRT_HAS_TRIED_THROW ON)
 set(FRT_HAS_BOUNDS_FAIL ON)
 
+if (${INDIGO_RPI_3})
+    message(STATUS "Building for Raspberry Pi 3 B+")
+else ()
+    message(STATUS "Building for Raspberry Pi 4 B+")
+endif ()
+
 add_subdirectory(vendor/freestanding-rt)
+indigo_configure_library(frt)
 add_subdirectory(lib)
 add_subdirectory(src)
+

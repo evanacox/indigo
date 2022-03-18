@@ -8,31 +8,32 @@
 #                                                                             #
 # ======---------------------------------------------------------------====== #
 
+list(APPEND INDIGO_BARE
+        -ffreestanding
+        -fno-exceptions
+        -fno-rtti
+        -nostdlib
+        -nostartfiles
+        -mgeneral-regs-only)
+
+list(APPEND INDIGO_WARNINGS
+        -Wall
+        -Wextra
+        -Wcast-qual
+        -Wconversion-null
+        -Wmissing-declarations
+        -Woverlength-strings
+        -Wpointer-arith
+        -Wunused-local-typedefs
+        -Wunused-result
+        -Wvarargs
+        -Wvla
+        -Wwrite-strings
+        -Werror
+        -ftemplate-backtrace-limit=20
+        -fconcepts-diagnostics-depth=5)
+
 function(indigo_configure_target TARGET)
-    list(APPEND INDIGO_WARNINGS
-            -Wall
-            -Wextra
-            -Wcast-qual
-            -Wconversion-null
-            -Wmissing-declarations
-            -Woverlength-strings
-            -Wpointer-arith
-            -Wunused-local-typedefs
-            -Wunused-result
-            -Wvarargs
-            -Wvla
-            -Wwrite-strings
-            -Werror
-            -ftemplate-backtrace-limit=20
-            -fconcepts-diagnostics-depth=5)
-
-    list(APPEND INDIGO_BARE
-            -ffreestanding
-            -fno-exceptions
-            -fno-rtti
-            -nostdlib
-            -nostartfiles)
-
     target_compile_options(${TARGET} PUBLIC ${INDIGO_WARNINGS} ${INDIGO_BARE})
     target_link_options(${TARGET} PUBLIC -nostdlib)
     target_link_libraries(${TARGET} PUBLIC frt)
@@ -41,12 +42,15 @@ function(indigo_configure_target TARGET)
         target_compile_definitions(${TARGET} PUBLIC INDIGO_DEBUG)
     endif ()
 
-    if (${INDIGO_RPI_4})
-        target_compile_definitions(${TARGET} PUBLIC INDIGO_RPI_4)
-    else ()
+    if (${INDIGO_RPI_3})
         target_compile_definitions(${TARGET} PUBLIC INDIGO_RPI_3)
+    else ()
+        target_compile_definitions(${TARGET} PUBLIC INDIGO_RPI_4)
     endif ()
 
-    target_compile_definitions(${TARGET} PUBLIC INDIGO_RPI_4)
     target_compile_features(${TARGET} PUBLIC cxx_std_20)
+endfunction()
+
+function(indigo_configure_library TARGET)
+    target_compile_options(${TARGET} PUBLIC ${INDIGO_BARE})
 endfunction()

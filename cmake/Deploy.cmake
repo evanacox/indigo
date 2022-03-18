@@ -8,13 +8,9 @@
 #                                                                             #
 # ======---------------------------------------------------------------====== #
 
-add_executable(indigo
-        ./native/halt.S
-        ./startup/boot.S
-        ./startup/entry.cc
-        ./stubs/frt.cc)
-indigo_configure_target(indigo)
-indigo_handle_linker_script(indigo ./layout.ld)
-indigo_create_image(indigo)
-target_link_libraries(indigo PRIVATE indigo_kio)
-indigo_copy_image()
+function(indigo_copy_image)
+    message(STATUS "Adding post-build target to copy ${CMAKE_BINARY_DIR}/kernel8.img to ${INDIGO_RPI_SD_CARD}/kernel8.img")
+    add_custom_command(TARGET indigo_img POST_BUILD
+            COMMAND test ! -e ${INDIGO_RPI_SD_CARD} || ${CMAKE_COMMAND} -E copy "${CMAKE_BINARY_DIR}/kernel8.img" "${INDIGO_RPI_SD_CARD}/kernel8.img"
+            COMMENT "Copying ${CMAKE_BINARY_DIR}/kernel8.img to ${INDIGO_RPI_SD_CARD}/kernel8.img if ${INDIGO_RPI_SD_CARD} exists...")
+endfunction()

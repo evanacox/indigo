@@ -27,11 +27,11 @@ function(indigo_handle_linker_script TARGET LINKER_SCRIPT)
 endfunction()
 
 function(indigo_create_image TARGET)
-    message(STATUS "Adding custom target ${TARGET}.img")
+    message(STATUS "Adding custom target ${TARGET}_img")
 
     add_custom_command(OUTPUT kernel8.img
             DEPENDS ${TARGET}
-            COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET} kernel8.img)
+            COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET} ${CMAKE_BINARY_DIR}/kernel8.img)
     add_custom_target(${TARGET}_img ALL
             DEPENDS ${TARGET} kernel8.img)
 endfunction()

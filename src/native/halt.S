@@ -8,11 +8,10 @@
 //                                                                           //
 //======---------------------------------------------------------------======//
 
-.section ".text"
-
 .global __indigo_halt
 
+.section ".text"
+
 __indigo_halt:
-.loop:
     wfe
-    b .loop
+    b __indigo_halt

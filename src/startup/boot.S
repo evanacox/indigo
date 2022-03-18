@@ -9,6 +9,7 @@
 //======---------------------------------------------------------------======//
 
 .global _start
+.global __indigo_entry
 .global __indigo_halt
 
 .section ".text.boot"
@@ -19,21 +20,21 @@
 // x3 -> 0
 // x4 -> 32 bit kernel entry point, _start location
 _start:
-    mrs     x5, mpidr_el1
-    and     x5, x5, #3
-    cbz     x5, .setup_stack
+    mrs     x5, mpidr_el1       // code starts executing on all cores, for now, we put all of them
+    and     x5, x5, #0xFF       // except the primary one in a halt loop
+    cbz     x5, .setup_env
     bl      __indigo_halt
-.setup_stack:
-    ldr     x5, =__stack_start
-    mov     sp, x5           // set stack pointer properly
-    ldr     x5, =__bss_start
-    ldr     w6, =__bss_size
-.clear_loop:                 // need to clear out BSS or our data will be screwed up
-    cbz     w6, .enter_cxx
+.setup_env:
+    ldr     x5, =_start         // set stack pointer properly
+    mov     sp, x5
+    ldr     x5, =__bss_start    // zero out .bss section
+    ldr     w6, =__bss_size     // make loop counter start at `__bss_size`
+    cbz     w6, .enter_cxx      // exit if loop counter == 0
+.bss_loop:
     str     xzr, [x5], #8
     sub     w6, w6, #1
-    cbnz    w6, .clear_loop
+    cbnz    w6, .bss_loop       // loop again if non-zero
 .enter_cxx:
-    bl      __indigo_entry  // jump to C++ code, shouldn't return. if it does, just loop infinitely
-    bl      __indigo_halt
+    bl      __indigo_entry      // jump to C++ code, shouldn't return.
+    b       __indigo_halt       // if it does, just halt
 

@@ -15,47 +15,46 @@
 #include "kio/sleep.h"
 #include <type_traits>
 
-inline constexpr int single_reg_pin_max = 31;
-inline constexpr int pins_per_function_select = 10;
-inline constexpr int all_alternates_set = 0b111;
-inline constexpr int function_select_width = 3;
-inline constexpr int pins_per_pull_up_down = 16;
-inline constexpr int pull_up_down_width = 2;
-inline constexpr int pull_down_all_set = 0b11;
+inline constexpr int gpio_register_width = 32;
 
-template <int PinMax, int LaneWidth, int AllAlternatesSet = 0, bool ClearBefore = false>
+// number of pins per set/clear register
+inline constexpr int pins_per_set_clear = gpio_register_width / 1; // 32, each bit => 1 pin
+
+// the number of pins per function select register
+inline constexpr int pins_per_function_select = gpio_register_width / 3; // 10, each 3 bits => 1 pin (top 2 reserved)
+
+// the number of pins per pull up/down register
+inline constexpr int pins_per_pull_up_down = gpio_register_width / 2; // 16, each 2 bits => 1 pin
+
+template <int PinMax, int LaneWidth = (32 / PinMax)>
 void gpio_update(int pin, std::uintptr_t reg, std::uint32_t value) {
+  FRT_ASSERT(pin <= kio::gpio_max_pin, "must use existing pins");
+
+  // get a mask of `LaneWidth` set bits
+  constexpr auto mask = (1U << LaneWidth) - 1U;
   auto bit_offset = (pin % PinMax) * LaneWidth;
-  auto old_value = kio::mmio_read(reg);
+  auto new_value = kio::mmio_read(reg);
 
-  if constexpr (ClearBefore) {
-    old_value &= ~(AllAlternatesSet << bit_offset);
-  }
+  new_value &= ~(mask << bit_offset);
+  new_value |= (value << bit_offset);
 
-  // clear and then set the function flags
-  kio::mmio_write(reg, old_value | (value << bit_offset));
+  kio::mmio_write(reg, new_value);
 }
 
 void kio::gpio_set(int pin) {
   FRT_ASSERT(pin <= kio::gpio_max_pin, "must use existing pins");
 
-  auto reg = (pin > single_reg_pin_max) ? kio::gpio_set0 : kio::gpio_set1;
-  auto bit_offset = pin % (single_reg_pin_max + 1); // 32nd pin -> 0th bit
-  auto old_value = kio::mmio_read(reg);
+  auto reg = (pin >= pins_per_set_clear) ? kio::gpio_set0 : kio::gpio_set1;
 
-  // set `bit_offset`th bit, if it's already set we're fine
-  kio::mmio_write(reg, old_value | (1 << bit_offset));
+  gpio_update<pins_per_set_clear>(pin, reg, 1);
 }
 
 void kio::gpio_clear(int pin) {
   FRT_ASSERT(pin <= kio::gpio_max_pin, "must use existing pins");
 
-  auto reg = (pin > single_reg_pin_max) ? kio::gpio_clear0 : kio::gpio_clear1;
-  auto bit_offset = pin % (single_reg_pin_max + 1); // 32nd pin -> 0th bit
-  auto old_value = kio::mmio_read(reg);
+  auto reg = (pin >= pins_per_set_clear) ? kio::gpio_clear0 : kio::gpio_clear1;
 
-  // clear `bit_offset`th bit, if it's already clear we're fine
-  kio::mmio_write(reg, old_value & ~(1 << bit_offset));
+  gpio_update<pins_per_set_clear>(pin, reg, 0);
 }
 
 void kio::gpio_function(int pin, GPIOFunction value) {
@@ -69,12 +68,8 @@ void kio::gpio_function(int pin, GPIOFunction value) {
       kio::gpio_function_select5};
 
   auto reg = select_offsets[pin / pins_per_function_select];
-  auto bit_offset = (pin % pins_per_function_select) * function_select_width;
-  auto old_value = kio::mmio_read(reg);
-  auto cleared = old_value & ~(all_alternates_set << bit_offset);
 
-  // clear and then set the function flags
-  kio::mmio_write(reg, cleared | (static_cast<std::uint32_t>(value) << bit_offset));
+  gpio_update<pins_per_function_select>(pin, reg, static_cast<std::uint32_t>(value));
 }
 
 void kio::gpio_pull(int pin, kio::PullState state) {
@@ -87,9 +82,8 @@ void kio::gpio_pull(int pin, kio::PullState state) {
       kio::gpio_pull_up_down3};
 
   auto reg = select_offsets[pin / pins_per_pull_up_down];
-  auto bit_offset = (pin % pins_per_pull_up_down) * pull_up_down_width;
 
-  kio::mmio_write(reg, (static_cast<std::uint32_t>(state) << bit_offset));
+  gpio_update<pins_per_pull_up_down>(pin, reg, static_cast<std::uint32_t>(state));
 
 #else
   inline constexpr std::uintptr_t gpio_pull_up_down_enable = kio::gpio_base + 0x94;
