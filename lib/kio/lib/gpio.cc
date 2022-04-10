@@ -26,8 +26,7 @@ inline constexpr int pins_per_function_select = gpio_register_width / 3; // 10, 
 // the number of pins per pull up/down register
 inline constexpr int pins_per_pull_up_down = gpio_register_width / 2; // 16, each 2 bits => 1 pin
 
-template <int PinMax, int LaneWidth = (32 / PinMax)>
-void gpio_update(int pin, std::uintptr_t reg, std::uint32_t value) {
+template <int PinMax, int LaneWidth = (32 / PinMax)> void gpio_write(int pin, std::uintptr_t reg, std::uint32_t value) {
   FRT_ASSERT(pin <= kio::gpio_max_pin, "must use existing pins");
 
   // get a mask of `LaneWidth` set bits
@@ -46,7 +45,7 @@ void kio::gpio_set(int pin) {
 
   auto reg = (pin >= pins_per_set_clear) ? kio::gpio_set0 : kio::gpio_set1;
 
-  gpio_update<pins_per_set_clear>(pin, reg, 1);
+  gpio_write<pins_per_set_clear>(pin, reg, 1);
 }
 
 void kio::gpio_clear(int pin) {
@@ -54,7 +53,7 @@ void kio::gpio_clear(int pin) {
 
   auto reg = (pin >= pins_per_set_clear) ? kio::gpio_clear0 : kio::gpio_clear1;
 
-  gpio_update<pins_per_set_clear>(pin, reg, 0);
+  gpio_write<pins_per_set_clear>(pin, reg, 0);
 }
 
 void kio::gpio_function(int pin, GPIOFunction value) {
@@ -69,7 +68,7 @@ void kio::gpio_function(int pin, GPIOFunction value) {
 
   auto reg = select_offsets[pin / pins_per_function_select];
 
-  gpio_update<pins_per_function_select>(pin, reg, static_cast<std::uint32_t>(value));
+  gpio_write<pins_per_function_select>(pin, reg, static_cast<std::uint32_t>(value));
 }
 
 void kio::gpio_pull(int pin, kio::PullState state) {
@@ -83,7 +82,7 @@ void kio::gpio_pull(int pin, kio::PullState state) {
 
   auto reg = select_offsets[pin / pins_per_pull_up_down];
 
-  gpio_update<pins_per_pull_up_down>(pin, reg, static_cast<std::uint32_t>(state));
+  gpio_write<pins_per_pull_up_down>(pin, reg, static_cast<std::uint32_t>(state));
 
 #else
   inline constexpr std::uintptr_t gpio_pull_up_down_enable = kio::gpio_base + 0x94;
@@ -100,4 +99,12 @@ void kio::gpio_pull(int pin, kio::PullState state) {
   kio::mmio_write(gpio_pull_up_down_enable, 0);
   kio::mmio_write(reg, 0);
 #endif
+}
+
+void kio::gpio_update(int pin, bool state) {
+  if (state) {
+    gpio_set(pin);
+  } else {
+    gpio_clear(pin);
+  }
 }

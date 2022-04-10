@@ -8,31 +8,7 @@
 #                                                                             #
 # ======---------------------------------------------------------------====== #
 
-cmake_minimum_required(VERSION 3.20)
-project(indigo LANGUAGES CXX ASM)
-
-include(cmake/Configure.cmake)
-include(cmake/GenerateImage.cmake)
-include(cmake/Deploy.cmake)
-
-# 'freestanding' implementation, eh?
-set(FRT_HAS_STDLIB ON)
-set(FRT_HAS_COMPARE ON)
-set(FRT_HAS_NEW ON)
-set(FRT_HAS_MEMCPY ON)
-set(FRT_HAS_ASSERT_FAIL ON)
-set(FRT_HAS_TRIED_THROW ON)
-set(FRT_HAS_BOUNDS_FAIL ON)
-
-if (${INDIGO_RPI_3})
-    message(STATUS "Building for Raspberry Pi 3 B+")
-else ()
-    message(STATUS "Building for Raspberry Pi 4 B+")
-endif ()
-
-add_subdirectory(vendor/etl)
-add_subdirectory(vendor/freestanding-rt)
-indigo_configure_library(frt)
-add_subdirectory(lib)
-add_subdirectory(src)
-
+add_library(indigo_klog lib/debug.cc)
+target_include_directories(indigo_klog PUBLIC ./include)
+target_link_libraries(indigo_klog PRIVATE indigo_kio)
+indigo_configure_target(indigo_klog)

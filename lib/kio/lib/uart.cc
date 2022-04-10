@@ -72,31 +72,3 @@ void kio::uart_write_raw(const char* message) {
     kio::uart_write_raw(*it);
   }
 }
-
-void kio::uart_write(char c) {
-  if (c == '\n') {
-    uart_write_raw("\r\n");
-  } else {
-    uart_write('\n');
-  }
-}
-
-void kio::uart_write(const char* message) {
-  for (const auto* it = message; *it != '\0'; ++it) {
-    if (*it == '\n') {
-      kio::uart_write_raw('\r');
-    }
-
-    kio::uart_write_raw(*it);
-  }
-}
-
-void kio::uart_writeln(char c) {
-  kio::uart_write_raw(c);
-  kio::uart_write_raw("\r\n");
-}
-
-void kio::uart_writeln(const char* message) {
-  kio::uart_write_raw(message);
-  kio::uart_write_raw("\r\n");
-}

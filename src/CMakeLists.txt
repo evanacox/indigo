@@ -10,11 +10,12 @@
 
 add_executable(indigo
         ./native/halt.S
-        ./startup/boot.S
-        ./startup/entry.cc
-        ./stubs/frt.cc)
+        ./stubs/frt.cc
+        ./boot.S
+        ./entry.cc
+        ./device_tree.cc)
 indigo_configure_target(indigo)
 indigo_handle_linker_script(indigo ./layout.ld)
 indigo_create_image(indigo)
-target_link_libraries(indigo PRIVATE indigo_kio)
+target_link_libraries(indigo PRIVATE indigo_kio indigo_klog)
 indigo_copy_image()

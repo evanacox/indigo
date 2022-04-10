@@ -53,10 +53,20 @@ namespace kio {
   void gpio_function(int pin, GPIOFunction function);
 
   /// Sets a GPIO pin to its ON state.
+  ///
+  /// \param pin The pin to update
   void gpio_set(int pin);
 
   /// Sets a GPIO pin to its OFF state.
+  ///
+  /// \param pin The pin to update
   void gpio_clear(int pin);
+
+  /// Sets a GPIO pin to `state` (where `true` = set and `false` = clear).
+  ///
+  /// \param pin The pin to update
+  /// \param state The new state for the pin
+  void gpio_update(int pin, bool state);
 
   enum class PullState : std::uint32_t {
     none = 0b00,

@@ -8,22 +8,8 @@
 //                                                                           //
 //======---------------------------------------------------------------======//
 
-#include "entry.h"
-#include "../native/halt.h"
-#include "kio/sleep.h"
-#include "kio/uart.h"
 #include <cstdint>
 
-extern volatile std::uint8_t* __bss_start; // NOLINT(readability-identifier-naming)
-extern volatile std::uint8_t* __bss_end;   // NOLINT(readability-identifier-naming)
-
-// dtb is a 32-bit pointer
-extern "C" void __indigo_entry(std::uint64_t /*dtb*/) {
-  kio::uart_init();
-
-  while (true) {
-    kio::uart_writeln("Hello, World!");
-  }
-
-  indigo::native::halt();
+extern "C" {
+  [[noreturn]] void __indigo_entry(std::uint64_t device_tree_blob);
 }

@@ -51,17 +51,4 @@ namespace kio {
   void uart_write_raw(char c);
 
   void uart_write_raw(const char* message);
-
-  void uart_write(char c);
-
-  void uart_write(const char* message);
-
-  void uart_writeln(char c);
-
-  void uart_writeln(const char* message);
-
-  template <typename... Args> void uart_writeln(Args&&... args) {
-    (kio::uart_write_raw(args), ...);
-    kio::uart_write_raw("\r\n");
-  }
 } // namespace kio

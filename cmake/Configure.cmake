@@ -12,8 +12,8 @@ list(APPEND INDIGO_BARE
         -ffreestanding
         -fno-exceptions
         -fno-rtti
-        -nostdlib
         -nostartfiles
+        -fmacro-prefix-map=${CMAKE_SOURCE_DIR}=indigo
         -mgeneral-regs-only)
 
 list(APPEND INDIGO_WARNINGS
@@ -35,8 +35,9 @@ list(APPEND INDIGO_WARNINGS
 
 function(indigo_configure_target TARGET)
     target_compile_options(${TARGET} PUBLIC ${INDIGO_WARNINGS} ${INDIGO_BARE})
-    target_link_options(${TARGET} PUBLIC -nostdlib)
-    target_link_libraries(${TARGET} PUBLIC frt)
+    target_compile_features(${TARGET} PUBLIC cxx_std_20)
+    target_link_options(${TARGET} PUBLIC -nostartfiles)
+    target_link_libraries(${TARGET} PUBLIC frt etl)
 
     if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
         target_compile_definitions(${TARGET} PUBLIC INDIGO_DEBUG)
@@ -47,8 +48,6 @@ function(indigo_configure_target TARGET)
     else ()
         target_compile_definitions(${TARGET} PUBLIC INDIGO_RPI_4)
     endif ()
-
-    target_compile_features(${TARGET} PUBLIC cxx_std_20)
 endfunction()
 
 function(indigo_configure_library TARGET)

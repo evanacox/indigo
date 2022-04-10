@@ -8,8 +8,19 @@
 //                                                                           //
 //======---------------------------------------------------------------======//
 
+#include "entry.h"
+#include "./device_tree.h"
+#include "./native/halt.h"
+#include "klog/debug.h"
+#include "klog/print.h"
 #include <cstdint>
 
-extern "C" {
-  void __indigo_entry(std::uint64_t device_tree_blob);
+// dtb is a 32-bit pointer
+extern "C" [[noreturn]] void __indigo_entry(std::uint64_t dtb) {
+  kio::uart_init();
+
+  klog::debug("Successfully entered kernel!");
+  indigo::parse_dtb(dtb);
+
+  indigo::native::halt();
 }
